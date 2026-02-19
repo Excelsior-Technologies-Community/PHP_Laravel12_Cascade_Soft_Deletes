@@ -1,8 +1,12 @@
 #  PHP_Laravel12_Cascade_Soft_Deletes
 
-![Laravel](https://img.shields.io/badge/Laravel-12-red)
-![PHP](https://img.shields.io/badge/PHP-8%2B-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+<p align="center">
+<img src="https://img.shields.io/badge/Laravel-12-red" alt="Laravel Version">
+<img src="https://img.shields.io/badge/PHP-8%2B-blue" alt="PHP Version">
+<img src="https://img.shields.io/badge/MySQL-Database-orange" alt="Database">
+<img src="https://img.shields.io/badge/Blade-Admin%20UI-green" alt="Blade UI">
+<img src="https://img.shields.io/badge/Cascade-Soft%20Deletes-purple" alt="Cascade Soft Deletes">
+</p>
 
 ---
 
