@@ -10,11 +10,17 @@ class Category extends Model
 {
     use SoftDeletes, CascadeSoftDeletes;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name'
+    ];
 
-    protected $cascadeDeletes = ['products'];
+    protected $cascadeDeletes = [
+        'products'
+    ];
 
-    protected $dates = ['deleted_at'];
+    protected $dates = [
+        'deleted_at'
+    ];
 
     public function products()
     {

@@ -4,49 +4,79 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\SoftDeleteHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // Display all products with their category
+    /**
+     * Display all active products with their category.
+     */
     public function index()
     {
-        $products = Product::with('category')->latest()->get();
+        $products = Product::with('category')
+            ->latest()
+            ->get();
+
         return view('products.index', compact('products'));
     }
 
-    // Show product creation form
+    /**
+     * Show product creation form.
+     */
     public function create()
     {
-        // Get all categories for dropdown
-        $categories = Category::all();
+        $categories = Category::latest()->get();
+
         return view('products.create', compact('categories'));
     }
 
-    // Store new product
+    /**
+     * Store new product.
+     */
     public function store(Request $request)
     {
-        // Validate product data
-        $request->validate([
-            'name' => 'required',
-            'category_id' => 'required'
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'category_id' => [
+                'required',
+                'exists:categories,id',
+            ],
         ]);
 
-        // Create product record
-        Product::create($request->all());
+        Product::create($validated);
 
-        // Redirect with success message
-        return redirect()->route('products.index')
-            ->with('success','✅ Product Created Successfully');
+        return redirect()
+            ->route('products.index')
+            ->with('success', '✅ Product Created Successfully');
     }
 
-    // Delete selected product
+    /**
+     * Delete selected product.
+     */
     public function destroy(Product $product)
     {
-        // Soft delete product
-        $product->delete();
+        DB::transaction(function () use ($product) {
 
-        // Redirect back with success message
-        return back()->with('success','🗑 Product Deleted Successfully');
+            SoftDeleteHistory::create([
+                'entity_type' => 'product',
+                'entity_id' => $product->id,
+                'parent_type' => 'category',
+                'parent_id' => $product->category_id,
+                'action' => 'deleted',
+                'deletion_source' => 'direct',
+                'event_at' => now(),
+            ]);
+
+            $product->delete();
+        });
+
+        return back()
+            ->with('success', '🗑 Product Deleted Successfully');
     }
 }
