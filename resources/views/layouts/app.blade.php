@@ -5,8 +5,10 @@
 
     <title>Laravel Cascade Soft Delete Admin</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
     <style>
 
@@ -20,6 +22,7 @@
             margin: 0;
             color: #1e293b;
         }
+
 
         /* NAVBAR */
 
@@ -47,6 +50,7 @@
             margin-right: 15px;
         }
 
+
         /* CONTAINER */
 
         .container {
@@ -54,6 +58,7 @@
             max-width: 1400px;
             margin: 30px auto;
         }
+
 
         /* HEADER */
 
@@ -69,6 +74,7 @@
             margin-bottom: 5px;
         }
 
+
         /* CARD */
 
         .card {
@@ -78,6 +84,28 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
         }
 
+
+        /* FILTER CARD */
+
+        .filter-card {
+            margin-bottom: 20px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .filter-grid label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+
         /* SECTION HEADER */
 
         .section-header {
@@ -85,13 +113,20 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            gap: 15px;
         }
 
         .section-header h3 {
             margin: 0;
         }
 
+
         /* TABLE */
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
 
         .table {
             width: 100%;
@@ -117,6 +152,7 @@
         .table tbody tr:hover {
             background: #f8fafc;
         }
+
 
         /* BUTTONS */
 
@@ -156,6 +192,7 @@
             opacity: .9;
         }
 
+
         /* BADGE */
 
         .badge {
@@ -176,6 +213,7 @@
             background: #ea580c;
         }
 
+
         /* ACTION */
 
         .action-btns {
@@ -184,17 +222,26 @@
             flex-wrap: wrap;
         }
 
+
         /* FORM */
 
         input,
         select {
             width: 100%;
             padding: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
             margin-bottom: 15px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
+            background: white;
         }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
 
         /* ALERT */
 
@@ -213,6 +260,7 @@
             background: #fee2e2;
             color: #991b1b;
         }
+
 
         /* STATISTICS */
 
@@ -244,6 +292,7 @@
             margin-top: 10px;
             color: #0f172a;
         }
+
 
         /* STATUS */
 
@@ -277,6 +326,7 @@
             font-weight: 600;
         }
 
+
         /* EMPTY STATE */
 
         .empty-state {
@@ -288,6 +338,62 @@
         .empty-state h3 {
             color: #334155;
         }
+
+
+        /* PAGINATION */
+
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .pagination-wrapper nav {
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination-wrapper svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .pagination-wrapper > nav > div:first-child {
+            display: none;
+        }
+
+        .pagination-wrapper nav div:last-child {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pagination-wrapper a,
+        .pagination-wrapper span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #1e293b;
+            background: white;
+        }
+
+        .pagination-wrapper a:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .pagination-wrapper span[aria-current="page"] {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
 
         /* MOBILE */
 
@@ -303,13 +409,15 @@
             }
 
             .table {
-                display: block;
-                overflow-x: auto;
                 white-space: nowrap;
             }
 
             .navbar {
                 padding: 15px;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
             }
 
         }
@@ -323,8 +431,10 @@
 
 <div class="navbar">
 
-    <a href="/categories"
-       class="navbar-brand">
+    <a
+        href="{{ route('categories.index') }}"
+        class="navbar-brand"
+    >
         🛡️ Cascade Soft Deletes
     </a>
 

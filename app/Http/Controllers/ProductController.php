@@ -11,15 +11,99 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
     /**
-     * Display all active products with their category.
+     * Display active products with search,
+     * category filter, sorting and pagination.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')
-            ->latest()
-            ->get();
+        $search = trim($request->input('search', ''));
+        $categoryId = $request->input('category_id');
+        $sort = $request->input('sort', 'oldest');
 
-        return view('products.index', compact('products'));
+        $perPage = (int) $request->input('per_page', 5);
+
+        if (!in_array($perPage, [5, 10, 25, 50], true)) {
+            $perPage = 5;
+        }
+
+        $query = Product::with('category');
+
+        /*
+         * 4. Product name search
+         */
+        if ($search !== '') {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        /*
+         * 5. Product category filter
+         */
+        if ($categoryId !== null && $categoryId !== '') {
+            $query->where('category_id', $categoryId);
+        }
+
+        /*
+         * 6. Product sorting
+         */
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+
+            case 'category_asc':
+                $query
+                    ->leftJoin(
+                        'categories',
+                        'products.category_id',
+                        '=',
+                        'categories.id'
+                    )
+                    ->select('products.*')
+                    ->orderBy('categories.name', 'asc');
+                break;
+
+            case 'category_desc':
+                $query
+                    ->leftJoin(
+                        'categories',
+                        'products.category_id',
+                        '=',
+                        'categories.id'
+                    )
+                    ->select('products.*')
+                    ->orderBy('categories.name', 'desc');
+                break;
+
+            default:
+                $query->oldest();
+                break;
+        }
+
+        /*
+         * 7. Product pagination
+         */
+        $products = $query
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $categories = Category::orderBy('name')->get();
+
+        return view('products.index', compact(
+            'products',
+            'categories',
+            'search',
+            'categoryId',
+            'sort',
+            'perPage'
+        ));
     }
 
     /**
@@ -27,7 +111,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = Category::latest()->get();
+        $categories = Category::oldest()->get();
 
         return view('products.create', compact('categories'));
     }

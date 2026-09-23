@@ -10,15 +10,69 @@ use Illuminate\Support\Facades\DB;
 class CategoryController extends Controller
 {
     /**
-     * Display all active categories with product count.
+     * Display active categories with search, sorting and pagination.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::withCount('products')
-            ->latest()
-            ->get();
+        $search = trim($request->input('search', ''));
+        $sort = $request->input('sort', 'oldest');
+        $perPage = (int) $request->input('per_page', 5);
 
-        return view('categories.index', compact('categories'));
+        if (!in_array($perPage, [5, 10, 25, 50], true)) {
+            $perPage = 5;
+        }
+
+        $query = Category::withCount('products');
+
+        /*
+         * 1. Category name search
+         */
+        if ($search !== '') {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        /*
+         * 2. Category sorting
+         */
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+
+            case 'products_desc':
+                $query->orderByDesc('products_count');
+                break;
+
+            case 'products_asc':
+                $query->orderBy('products_count', 'asc');
+                break;
+
+            default:
+                $query->oldest();
+                break;
+        }
+
+        /*
+         * 3. Category pagination
+         */
+        $categories = $query
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('categories.index', compact(
+            'categories',
+            'search',
+            'sort',
+            'perPage'
+        ));
     }
 
     /**

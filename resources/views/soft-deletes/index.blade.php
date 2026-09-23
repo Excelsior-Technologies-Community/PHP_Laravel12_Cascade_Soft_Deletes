@@ -3,137 +3,315 @@
 @section('content')
 
 <div class="page-header">
+
     <div>
+
         <h2>🗑️ Soft Deleted Records</h2>
+
         <p style="color:#64748b;">
-            Manage deleted categories and products, restore records,
-            or permanently remove them.
+            Search deleted records, filter deletion source,
+            restore records or permanently remove them.
         </p>
+
     </div>
 
-    <a href="{{ route('soft-deletes.analytics') }}"
-       class="btn btn-primary">
+    <a
+        href="{{ route('soft-deletes.analytics') }}"
+        class="btn btn-primary"
+    >
         📊 View Analytics
     </a>
+
+</div>
+
+
+{{-- Deleted Record Filters --}}
+
+<div class="card filter-card">
+
+    <form
+        method="GET"
+        action="{{ route('soft-deletes.index') }}"
+    >
+
+        <div class="filter-grid">
+
+            <div>
+
+                <label>
+                    🔎 Search Deleted Records
+                </label>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ $search }}"
+                    placeholder="Search category or product..."
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    🎯 Delete Source
+                </label>
+
+                <select name="source">
+
+                    <option value="">
+                        All Sources
+                    </option>
+
+                    <option
+                        value="direct"
+                        {{ $source === 'direct' ? 'selected' : '' }}
+                    >
+                        🗑 Direct Delete
+                    </option>
+
+                    <option
+                        value="cascade"
+                        {{ $source === 'cascade' ? 'selected' : '' }}
+                    >
+                        🔄 Cascade Delete
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    📁 Category Per Page
+                </label>
+
+                <select name="category_per_page">
+
+                    @foreach([5, 10, 25, 50] as $size)
+
+                        <option
+                            value="{{ $size }}"
+                            {{ $categoryPerPage == $size
+                                ? 'selected'
+                                : '' }}
+                        >
+                            {{ $size }}
+                        </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    📦 Product Per Page
+                </label>
+
+                <select name="product_per_page">
+
+                    @foreach([5, 10, 25, 50] as $size)
+
+                        <option
+                            value="{{ $size }}"
+                            {{ $productPerPage == $size
+                                ? 'selected'
+                                : '' }}
+                        >
+                            {{ $size }}
+                        </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="action-btns">
+
+            <button class="btn btn-primary">
+                🔍 Apply Filters
+            </button>
+
+            <a
+                href="{{ route('soft-deletes.index') }}"
+                class="btn btn-warning"
+            >
+                ↻ Reset
+            </a>
+
+        </div>
+
+    </form>
+
 </div>
 
 
 {{-- Deleted Categories --}}
 
-<div class="card" style="margin-bottom:25px;">
+<div
+    class="card"
+    style="margin-bottom:25px;"
+>
 
     <div class="section-header">
-        <h3>📁 Deleted Categories</h3>
+
+        <h3>
+            📁 Deleted Categories
+        </h3>
 
         <span class="badge">
-            {{ $deletedCategories->count() }}
+            {{ $deletedCategories->total() }}
         </span>
+
     </div>
+
 
     @if($deletedCategories->count())
 
-        <table class="table">
+        <div class="table-wrapper">
 
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Category</th>
-                    <th>Affected Products</th>
-                    <th>Deleted At</th>
-                    <th>Recovery</th>
-                </tr>
-            </thead>
+            <table class="table">
 
-            <tbody>
+                <thead>
 
-            @foreach($deletedCategories as $category)
+                    <tr>
 
-                @php
-                    $affectedProducts = $category->products
-                        ->whereNotNull('deleted_at')
-                        ->count();
-                @endphp
+                        <th>ID</th>
+                        <th>Category</th>
+                        <th>Affected Products</th>
+                        <th>Deleted At</th>
+                        <th>Recovery</th>
 
-                <tr>
+                    </tr>
 
-                    <td>#{{ $category->id }}</td>
+                </thead>
 
-                    <td>
-                        <strong>{{ $category->name }}</strong>
-                    </td>
+                <tbody>
 
-                    <td>
-                        <span class="badge">
-                            {{ $affectedProducts }} Products
-                        </span>
-                    </td>
+                @foreach($deletedCategories as $category)
 
-                    <td>
-                        {{ $category->deleted_at?->format('d M Y h:i A') }}
-                    </td>
+                    @php
+                        $affectedProducts = $category->products
+                            ->whereNotNull('deleted_at')
+                            ->count();
+                    @endphp
 
-                    <td>
+                    <tr>
 
-                        <div class="action-btns">
+                        <td>
+                            #{{ $category->id }}
+                        </td>
 
-                            <form method="POST"
-                                  action="{{ route(
-                                      'soft-deletes.categories.restore',
-                                      $category->id
-                                  ) }}">
-                                @csrf
+                        <td>
+                            <strong>
+                                {{ $category->name }}
+                            </strong>
+                        </td>
 
-                                <button
-                                    class="btn btn-success btn-sm"
-                                    onclick="return confirm(
-                                        'Restore this category and its cascade-deleted products?'
-                                    )">
+                        <td>
 
-                                    ♻️ Restore
+                            <span class="badge">
+                                {{ $affectedProducts }} Products
+                            </span>
 
-                                </button>
+                        </td>
 
-                            </form>
+                        <td>
+                            {{ $category->deleted_at?->format(
+                                'd M Y h:i A'
+                            ) }}
+                        </td>
+
+                        <td>
+
+                            <div class="action-btns">
+
+                                <form
+                                    method="POST"
+                                    action="{{ route(
+                                        'soft-deletes.categories.restore',
+                                        $category->id
+                                    ) }}"
+                                >
+
+                                    @csrf
+
+                                    <button
+                                        class="btn btn-success btn-sm"
+                                        onclick="return confirm(
+                                            'Restore this category and its cascade-deleted products?'
+                                        )"
+                                    >
+                                        ♻️ Restore
+                                    </button>
+
+                                </form>
 
 
-                            <form method="POST"
-                                  action="{{ route(
-                                      'soft-deletes.categories.force',
-                                      $category->id
-                                  ) }}"
-                                  onsubmit="return confirm(
-                                      'Permanently delete this category and all related products? This cannot be undone.'
-                                  )">
+                                <form
+                                    method="POST"
+                                    action="{{ route(
+                                        'soft-deletes.categories.force',
+                                        $category->id
+                                    ) }}"
+                                    onsubmit="return confirm(
+                                        'Permanently delete this category and all related products? This cannot be undone.'
+                                    )"
+                                >
 
-                                @csrf
-                                @method('DELETE')
+                                    @csrf
+                                    @method('DELETE')
 
-                                <button
-                                    class="btn btn-danger btn-sm">
+                                    <button
+                                        class="btn btn-danger btn-sm"
+                                    >
+                                        🔥 Delete Forever
+                                    </button>
 
-                                    🔥 Delete Forever
+                                </form>
 
-                                </button>
+                            </div>
 
-                            </form>
+                        </td>
 
-                        </div>
+                    </tr>
 
-                    </td>
+                @endforeach
 
-                </tr>
+                </tbody>
 
-            @endforeach
+            </table>
 
-            </tbody>
+        </div>
 
-        </table>
+
+        <div class="pagination-wrapper">
+
+            {{ $deletedCategories->links() }}
+
+        </div>
 
     @else
 
         <div class="empty-state">
+
             <h3>✅ No Deleted Categories</h3>
-            <p>There are currently no soft deleted categories.</p>
+
+            <p>
+                No deleted categories match your filters.
+            </p>
+
         </div>
 
     @endif
@@ -146,172 +324,210 @@
 <div class="card">
 
     <div class="section-header">
-        <h3>📦 Deleted Products</h3>
+
+        <h3>
+            📦 Deleted Products
+        </h3>
 
         <span class="badge">
-            {{ $deletedProducts->count() }}
+            {{ $deletedProducts->total() }}
         </span>
+
     </div>
 
 
     @if($deletedProducts->count())
 
-        <table class="table">
+        <div class="table-wrapper">
 
-            <thead>
+            <table class="table">
 
-                <tr>
-                    <th>ID</th>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th>Delete Source</th>
-                    <th>Deleted At</th>
-                    <th>Recovery</th>
-                </tr>
+                <thead>
 
-            </thead>
+                    <tr>
 
-            <tbody>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Delete Source</th>
+                        <th>Deleted At</th>
+                        <th>Recovery</th>
 
-            @foreach($deletedProducts as $product)
+                    </tr>
 
-                @php
+                </thead>
 
-                    $history = \App\Models\SoftDeleteHistory::where(
-                        'entity_type',
-                        'product'
-                    )
-                    ->where(
-                        'entity_id',
-                        $product->id
-                    )
-                    ->latest()
-                    ->first();
+                <tbody>
 
-                @endphp
+                @foreach($deletedProducts as $product)
 
-                <tr>
+                    @php
 
-                    <td>#{{ $product->id }}</td>
+                        $history =
+                            \App\Models\SoftDeleteHistory::where(
+                                'entity_type',
+                                'product'
+                            )
+                            ->where(
+                                'entity_id',
+                                $product->id
+                            )
+                            ->latest()
+                            ->first();
 
-                    <td>
-                        <strong>{{ $product->name }}</strong>
-                    </td>
+                    @endphp
 
-                    <td>
+                    <tr>
 
-                        @if($product->category)
+                        <td>
+                            #{{ $product->id }}
+                        </td>
 
-                            {{ $product->category->name }}
+                        <td>
+                            <strong>
+                                {{ $product->name }}
+                            </strong>
+                        </td>
 
-                            @if($product->category->trashed())
+                        <td>
+
+                            @if($product->category)
+
+                                {{ $product->category->name }}
+
+                                @if($product->category->trashed())
+
+                                    <span class="status-deleted">
+                                        Category Deleted
+                                    </span>
+
+                                @endif
+
+                            @else
+
                                 <span class="status-deleted">
-                                    Category Deleted
+                                    Category Missing
                                 </span>
+
                             @endif
 
-                        @else
+                        </td>
 
-                            <span class="status-deleted">
-                                Category Missing
-                            </span>
+                        <td>
 
-                        @endif
+                            @if(
+                                $history?->deletion_source === 'cascade'
+                            )
 
-                    </td>
+                                <span class="badge badge-cascade">
+                                    🔄 Cascade Delete
+                                </span>
 
-                    <td>
+                            @else
 
-                        @if($history?->deletion_source === 'cascade')
+                                <span class="badge badge-direct">
+                                    🗑 Direct Delete
+                                </span>
 
-                            <span class="badge badge-cascade">
-                                🔄 Cascade Delete
-                            </span>
+                            @endif
 
-                        @else
+                        </td>
 
-                            <span class="badge badge-direct">
-                                🗑 Direct Delete
-                            </span>
+                        <td>
+                            {{ $product->deleted_at?->format(
+                                'd M Y h:i A'
+                            ) }}
+                        </td>
 
-                        @endif
+                        <td>
 
-                    </td>
+                            @if(
+                                $product->category &&
+                                !$product->category->trashed()
+                            )
 
-                    <td>
-                        {{ $product->deleted_at?->format('d M Y h:i A') }}
-                    </td>
+                                <div class="action-btns">
 
-                    <td>
+                                    <form
+                                        method="POST"
+                                        action="{{ route(
+                                            'soft-deletes.products.restore',
+                                            $product->id
+                                        ) }}"
+                                    >
 
-                        @if($product->category && !$product->category->trashed())
+                                        @csrf
 
-                            <div class="action-btns">
+                                        <button
+                                            class="btn btn-success btn-sm"
+                                        >
+                                            ♻️ Restore
+                                        </button>
 
-                                <form method="POST"
-                                      action="{{ route(
-                                          'soft-deletes.products.restore',
-                                          $product->id
-                                      ) }}">
-
-                                    @csrf
-
-                                    <button
-                                        class="btn btn-success btn-sm">
-
-                                        ♻️ Restore
-
-                                    </button>
-
-                                </form>
+                                    </form>
 
 
-                                <form method="POST"
-                                      action="{{ route(
-                                          'soft-deletes.products.force',
-                                          $product->id
-                                      ) }}"
-                                      onsubmit="return confirm(
-                                          'Permanently delete this product?'
-                                      )">
+                                    <form
+                                        method="POST"
+                                        action="{{ route(
+                                            'soft-deletes.products.force',
+                                            $product->id
+                                        ) }}"
+                                        onsubmit="return confirm(
+                                            'Permanently delete this product?'
+                                        )"
+                                    >
 
-                                    @csrf
-                                    @method('DELETE')
+                                        @csrf
+                                        @method('DELETE')
 
-                                    <button
-                                        class="btn btn-danger btn-sm">
+                                        <button
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            🔥 Delete Forever
+                                        </button>
 
-                                        🔥 Delete Forever
+                                    </form>
 
-                                    </button>
+                                </div>
 
-                                </form>
+                            @else
 
-                            </div>
+                                <span class="restore-warning">
+                                    Restore Category First
+                                </span>
 
-                        @else
+                            @endif
 
-                            <span class="restore-warning">
-                                Restore Category First
-                            </span>
+                        </td>
 
-                        @endif
+                    </tr>
 
-                    </td>
+                @endforeach
 
-                </tr>
+                </tbody>
 
-            @endforeach
+            </table>
 
-            </tbody>
+        </div>
 
-        </table>
+
+        <div class="pagination-wrapper">
+
+            {{ $deletedProducts->links() }}
+
+        </div>
 
     @else
 
         <div class="empty-state">
+
             <h3>✅ No Deleted Products</h3>
-            <p>There are currently no soft deleted products.</p>
+
+            <p>
+                No deleted products match your filters.
+            </p>
+
         </div>
 
     @endif
