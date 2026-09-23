@@ -5,26 +5,133 @@
 <div class="page-header">
 
     <div>
+
         <h2>📊 Soft Delete Analytics</h2>
 
         <p style="color:#64748b;">
             Monitor active, deleted, restored and cascade-deleted records.
         </p>
+
     </div>
 
-    <a href="{{ route('soft-deletes.index') }}"
-       class="btn btn-primary">
-
+    <a
+        href="{{ route('soft-deletes.index') }}"
+        class="btn btn-primary"
+    >
         🗑️ Deleted Records
-
     </a>
+
+</div>
+
+
+{{-- Analytics Filters --}}
+
+<div class="card filter-card">
+
+    <form
+        method="GET"
+        action="{{ route('soft-deletes.analytics') }}"
+    >
+
+        <div class="filter-grid">
+
+            <div>
+
+                <label>
+                    🎯 Action
+                </label>
+
+                <select name="action">
+
+                    <option value="">
+                        All Actions
+                    </option>
+
+                    <option
+                        value="deleted"
+                        {{ $action === 'deleted'
+                            ? 'selected'
+                            : '' }}
+                    >
+                        🗑 Deleted
+                    </option>
+
+                    <option
+                        value="restored"
+                        {{ $action === 'restored'
+                            ? 'selected'
+                            : '' }}
+                    >
+                        ♻️ Restored
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    🎯 Source
+                </label>
+
+                <select name="source">
+
+                    <option value="">
+                        All Sources
+                    </option>
+
+                    <option
+                        value="direct"
+                        {{ $source === 'direct'
+                            ? 'selected'
+                            : '' }}
+                    >
+                        🗑 Direct
+                    </option>
+
+                    <option
+                        value="cascade"
+                        {{ $source === 'cascade'
+                            ? 'selected'
+                            : '' }}
+                    >
+                        🔄 Cascade
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="action-btns">
+
+            <button class="btn btn-primary">
+                🔍 Apply Filters
+            </button>
+
+            <a
+                href="{{ route('soft-deletes.analytics') }}"
+                class="btn btn-warning"
+            >
+                ↻ Reset
+            </a>
+
+        </div>
+
+    </form>
 
 </div>
 
 
 {{-- Category Statistics --}}
 
-<h3>📁 Category Statistics</h3>
+<h3>
+    📁 Category Statistics
+</h3>
 
 <div class="stats-grid">
 
@@ -83,6 +190,7 @@
 <div class="stats-grid">
 
     <div class="stat-card">
+
         <div class="stat-title">
             Active Products
         </div>
@@ -90,10 +198,12 @@
         <div class="stat-number">
             {{ $activeProducts }}
         </div>
+
     </div>
 
 
     <div class="stat-card">
+
         <div class="stat-title">
             Deleted Products
         </div>
@@ -101,10 +211,12 @@
         <div class="stat-number">
             {{ $deletedProducts }}
         </div>
+
     </div>
 
 
     <div class="stat-card">
+
         <div class="stat-title">
             Cascade Deleted Products
         </div>
@@ -112,10 +224,12 @@
         <div class="stat-number">
             {{ $cascadeDeletedProducts }}
         </div>
+
     </div>
 
 
     <div class="stat-card">
+
         <div class="stat-title">
             Direct Deleted Products
         </div>
@@ -123,10 +237,12 @@
         <div class="stat-number">
             {{ $directDeletedProducts }}
         </div>
+
     </div>
 
 
     <div class="stat-card">
+
         <div class="stat-title">
             Total Products
         </div>
@@ -134,10 +250,12 @@
         <div class="stat-number">
             {{ $totalProducts }}
         </div>
+
     </div>
 
 
     <div class="stat-card">
+
         <div class="stat-title">
             Restored Products
         </div>
@@ -145,6 +263,7 @@
         <div class="stat-number">
             {{ $restoredProducts }}
         </div>
+
     </div>
 
 </div>
@@ -152,7 +271,10 @@
 
 {{-- Recent History --}}
 
-<div class="card" style="margin-top:30px;">
+<div
+    class="card"
+    style="margin-top:30px;"
+>
 
     <div class="section-header">
 
@@ -169,94 +291,112 @@
 
     @if($recentHistory->count())
 
-        <table class="table">
+        <div class="table-wrapper">
 
-            <thead>
+            <table class="table">
 
-                <tr>
-                    <th>Entity</th>
-                    <th>ID</th>
-                    <th>Action</th>
-                    <th>Source</th>
-                    <th>Event Time</th>
-                </tr>
+                <thead>
 
-            </thead>
+                    <tr>
 
-            <tbody>
+                        <th>Entity</th>
+                        <th>ID</th>
+                        <th>Action</th>
+                        <th>Source</th>
+                        <th>Event Time</th>
 
-            @foreach($recentHistory as $history)
+                    </tr>
 
-                <tr>
+                </thead>
 
-                    <td>
-                        {{ ucfirst($history->entity_type) }}
-                    </td>
+                <tbody>
 
-                    <td>
-                        #{{ $history->entity_id }}
-                    </td>
+                @foreach($recentHistory as $history)
 
-                    <td>
+                    <tr>
 
-                        @if($history->action === 'deleted')
+                        <td>
+                            {{ ucfirst(
+                                $history->entity_type
+                            ) }}
+                        </td>
 
-                            <span class="history-deleted">
-                                🗑 Deleted
-                            </span>
+                        <td>
+                            #{{ $history->entity_id }}
+                        </td>
 
-                        @else
+                        <td>
 
-                            <span class="history-restored">
-                                ♻️ Restored
-                            </span>
+                            @if(
+                                $history->action === 'deleted'
+                            )
 
-                        @endif
+                                <span class="history-deleted">
+                                    🗑 Deleted
+                                </span>
 
-                    </td>
+                            @else
 
-                    <td>
+                                <span class="history-restored">
+                                    ♻️ Restored
+                                </span>
 
-                        @if($history->deletion_source === 'cascade')
+                            @endif
 
-                            <span class="badge badge-cascade">
-                                🔄 Cascade
-                            </span>
+                        </td>
 
-                        @elseif($history->deletion_source === 'direct')
+                        <td>
 
-                            <span class="badge badge-direct">
-                                🗑 Direct
-                            </span>
+                            @if(
+                                $history->deletion_source === 'cascade'
+                            )
 
-                        @else
+                                <span class="badge badge-cascade">
+                                    🔄 Cascade
+                                </span>
 
-                            —
+                            @elseif(
+                                $history->deletion_source === 'direct'
+                            )
 
-                        @endif
+                                <span class="badge badge-direct">
+                                    🗑 Direct
+                                </span>
 
-                    </td>
+                            @else
 
-                    <td>
-                        {{ $history->event_at?->format('d M Y h:i A') }}
-                    </td>
+                                —
 
-                </tr>
+                            @endif
 
-            @endforeach
+                        </td>
 
-            </tbody>
+                        <td>
+                            {{ $history->event_at?->format(
+                                'd M Y h:i A'
+                            ) }}
+                        </td>
 
-        </table>
+                    </tr>
+
+                @endforeach
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     @else
 
         <div class="empty-state">
 
-            <h3>📭 No History Available</h3>
+            <h3>
+                📭 No History Available
+            </h3>
 
             <p>
-                Soft delete activity will appear here.
+                No history matches the selected filters.
             </p>
 
         </div>
